@@ -3,30 +3,32 @@
 
 require_once "libreria.php";
 
-/*
- c++ --> include stdio.h
- c# -->  using system.data.sqlserver;
- vb -->  imports system.data.sqlserver;
- javascript|typescript esm2026 + --> import * from 'libreria';
- javascript < esm2025 --> const vari = require 'libreria';
- python --> import objetos from 'libreria'
- python --> import 'libreria';
- go --> import (
-    fmt,
-    io,
-    net,
-    string
- )
-*/
+$codigoProducto = 0;
+$codigoRefresco = 0;
+$txtNombre = "";
+$txtEmail = "";
 
-//
-// include "namspace/..n../?object" | "path/ToFile/";
-// // Me permite incluir varias veces el mismo archivos o la misma libreria.
-// include_once "namspace/..n../?object" | "path/ToFile/";
-// // 
-// require "namspace/..n../?object" | "path/ToFile/";
+if (isset($_POST["btnEnviar"])) {
+    $codigoProducto = intval($_POST["cmbProducto"]);
+    $codigoRefresco = intval($_POST["cmbRefrescos"]);
+    $txtNombre = $_POST["txtNombre"];
+    $txtEmail = $_POST["txtEmail"];
+    $productoSeleccionado = getProductoByCodigo($codigoProducto);
+    $refrescoSeleccionado = getRefrescoByCodigo($codigoRefresco);
 
-// require_once "namspace/..n../?object" | "path/ToFile/";
+    $estructraDeOrden = [
+        "nombre" => $txtNombre,
+        "correo" => $txtEmail,
+        "producto" => $productoSeleccionado,
+        "refresco" => $refrescoSeleccionado,
+        "subtotal" => $productoSeleccionado["precio"] + $refrescoSeleccionado["precio"],
+        "iva" => ($productoSeleccionado["precio"] * $productoSeleccionado["iva"]) +
+            ($refrescoSeleccionado["precio"] * $refrescoSeleccionado["iva"]),
+    ];
+    $estructraDeOrden["total"] = $estructraDeOrden["subtotal"]  + $estructraDeOrden["iva"];
+
+    guardarEnSession($estructraDeOrden);
+}
 
 
 
@@ -40,16 +42,56 @@ require_once "libreria.php";
     <title>Formulario Pulpería La Concordia</title>
     <h1>Compra de Pulpería</h1>
     <form action="formulario.php" method="post">
-
+        <div>
+            <label for="cmbProducto">Seleccione un Producto: </label>
+            <select id="cmbProducto" name="cmbProducto">
+                <?php
+                $productos = getProductos();
+                foreach ($productos as $producto) {
+                    $value = $producto["codigo"];
+                    $descripcion = $producto["descripcion"];
+                    $precio = $producto["precio"];
+                    $grabado = ($producto["iva"] > 0) ? "G" : "";
+                    echo '<option value="' .
+                        $value . '">' . $descripcion .
+                        ' (' . $precio . ') '
+                        . $grabado . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div>
+            <label for="cmbRefrescos">Seleccione un Refresco: </label>
+            <select id="cmbRefrescos" name="cmbRefrescos">
+                <?php
+                $refrescos = getRefrescos();
+                foreach ($refrescos as $refresco) {
+                    $value = $refresco["codigo"];
+                    $descripcion = $refresco["descripcion"];
+                    $precio = $refresco["precio"];
+                    $grabado = ($refresco["iva"] > 0) ? "G" : "";
+                    echo '<option value="' .
+                        $value . '">' . $descripcion .
+                        ' (' . $precio . ') '
+                        . $grabado . '</option>';
+                }
+                ?>
+            </select>
+        </div>
+        <div>
+            <label for="txtNombre">Nombre Cliente: </label>
+            <input type="text" name="txtNombre" id="txtnombre"
+                placeholder="Nombre Completo del Cliente" />
+        </div>
+        <div>
+            <label for="txtEmail">Correo Electrónico: </label>
+            <input type="email" name="txtEmail" id="txtEmail"
+                placeholder="Corre  del Cliente" />
+        </div>
+        <div>
+            <button type="submit" name="btnEnviar">Enviar</button>
+        </div>
     </form>
-    <div>
-
-        <?php
-
-        print_r(getProductos());
-
-        ?>
-    </div>
 </head>
 
 <body>
