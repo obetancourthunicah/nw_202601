@@ -1,0 +1,11 @@
+{
+    "name": "nw/oop",
+    "description": "Ejercicios de Programacion Orientada a Objetos con PHP",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Nw\\Oop\\": "src/"
+        }
+    },
+    "require": {}
+}
